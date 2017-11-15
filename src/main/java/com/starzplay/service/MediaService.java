@@ -2,6 +2,7 @@ package com.starzplay.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,21 +41,37 @@ public class MediaService implements IMediaService {
 	 * @param level
 	 * @return
 	 */
-	private ExternalContentResponse filterMedia(ExternalContentResponse response, FilterEnum filter,
-			LevelEnum level) {
+	private ExternalContentResponse filterMedia(ExternalContentResponse response, FilterEnum filter, LevelEnum level) {
 
-		if ((level == null || CommonConstants.EMPTY.equals(level.getCode())) ) {
+		if ((level == null || CommonConstants.EMPTY.equals(level.getCode()))) {
 			return response;
 		}
-		// List<EntryViewModel> filteredList = response.getEntries().parallelStream().filter(ent -> ent.getPeg$contentClassification().equalsIgnoreCase(level.getCode())).collect(Collectors.toList());
-		
+		// List<EntryViewModel> filteredList =
+		// response.getEntries().parallelStream().filter(ent ->
+		// ent.getPeg$contentClassification().equalsIgnoreCase(level.getCode())).collect(Collectors.toList());
+
 		// In any case, our response should only contain 1 element in the media array.
 		// so finding first element and returning
-		// if we need full list we can use above commented code, which will return complte matching list
-		Entry findFirst = response.getEntries().parallelStream().filter(ent -> ent.getPeg$contentClassification().equalsIgnoreCase(level.getCode())).findFirst().get();
+		// if we need full list we can use above commented code, which will return
+		// complte matching list
+
+		Optional<Entry> findFirst = null;
+		if (level.getCode().equalsIgnoreCase(LevelEnum.censored.getCode())) {
+			findFirst = response.getEntries().parallelStream()
+					.filter(ent -> ent.getPeg$contentClassification().equalsIgnoreCase(level.getCode())
+							&& ent.getGuid().endsWith(CommonConstants.GUID_ENDS_WITH_CHARACTER)
+
+					).findFirst();
+		} else {
+			findFirst = response.getEntries().parallelStream()
+					.filter(ent -> ent.getPeg$contentClassification().equalsIgnoreCase(level.getCode())).findFirst();
+		}
 		List<Entry> filteredList = new ArrayList<>();
-		filteredList.add(findFirst);
-		
+
+		if (findFirst.isPresent()) {
+			filteredList.add(findFirst.get());
+		}
+
 		response.setEntries(filteredList);
 		return response;
 	}

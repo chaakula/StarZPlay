@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.Assert;
 
 import com.startzplay.ControllerTestConfig;
 import com.startzplay.ReadJSONUtil;
@@ -65,7 +66,7 @@ public class MediaServiceTest {
 		Mockito.when(mediaRepo.getMedia(Matchers.any(FilterEnum.class), Matchers.any(LevelEnum.class)))
 				.thenReturn(mockResponse());
 		ExternalContentResponse media = mediaService.getMedia(FilterEnum.censoring, LevelEnum.censored);
-		assertEquals(1, media.getEntries().size());
+		assertEquals(0, media.getEntries().size());
 	}
 
 	@Test
